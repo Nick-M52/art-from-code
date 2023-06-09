@@ -1,0 +1,808 @@
+---
+title: "Exercises and Art Project"
+format: html
+editor_options: 
+  chunk_output_type: inline
+---
+
+Nick Momaney
+
+CHOYOA 3
+
+# Task 1
+
+# Exercise Group 1
+
+```{r}
+#loading in packages
+
+library(ggplot2)
+library(tibble)
+library(dplyr)
+
+```
+
+```{r}
+#calling mpg data set
+mpg
+
+```
+
+```{r}
+#creating art from mpg data set
+
+mpg |> 
+  ggplot(aes(displ, hwy, colour = drv)) + 
+  #large size points
+  geom_point(show.legend = FALSE, size = 4) + 
+  #small size points
+  geom_point(show.legend = FALSE, size = 1, colour = "#222222") + 
+  #make points circular
+  coord_polar() + 
+  #remove all the standard graph elements
+  theme_void() + 
+  #make the points vibrant colors manually
+  scale_color_manual(values = c("#FF0000", "#00FF00", "#0000FF")) +
+  #change the background color
+  theme(panel.background = element_rect(fill = "#FFFF00"))
+       
+
+```
+
+# Exercise Group 2
+
+# Exercise 1
+
+```{r}
+library(ggplot2)
+library(tibble)
+
+polar_art <- function(seed, n, palette) {
+  
+  # set the state of the random number generator
+  set.seed(seed)
+  
+  # data frame containing random values for 
+  # aesthetics we might want to use in the art
+  dat <- tibble(
+    x0 = runif(n),
+    y0 = runif(n),
+    x1 = x0 + runif(n, min = -.2, max = .2),
+    y1 = y0 + runif(n, min = -.2, max = .2),
+    shade = runif(n), 
+    size = runif(n)
+  )
+  
+  # plot segments in various colours, using 
+  # polar coordinates and a gradient palette
+  dat |> 
+    ggplot(aes(
+      x = x0,
+      y = y0,
+      xend = x1,
+      yend = y1,
+      colour = shade,
+      size = size
+    )) +
+    geom_segment(show.legend = FALSE) +
+    coord_polar() +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0)) + 
+    scale_colour_gradientn(colours = palette) + 
+    scale_size(range = c(0, 10)) + 
+    theme_void()
+}
+
+polar_art(
+  seed = 2, 
+  n = 50, 
+  palette = c("red", "black", "white")
+)
+
+
+```
+
+```{r}
+polar_art(seed=10, n=100, palette = c("blue", "gold", "white"))
+```
+
+# Exercise 2
+
+polar art 2 created and it assigns random colors to variables that change with any change in seed value.
+
+```{r}
+library(ggplot2)
+library(tibble)
+
+#This function will asign random colors to the variables that change anytime the seed value is changed
+
+polar_art <- function(seed, n) {
+  
+  # set the state of the random number generator
+  set.seed(seed)
+  
+  # data frame containing random values for 
+  # aesthetics we might want to use in the art
+  dat <- tibble(
+    x0 = runif(n),
+    y0 = runif(n),
+    x1 = x0 + runif(n, min = -.2, max = .2),
+    y1 = y0 + runif(n, min = -.2, max = .2),
+    shade = runif(n), 
+    size = runif(n)
+  )
+  
+  # Generate a new set of random colors for each execution
+  colors <- sample(colors(), n)
+  
+  # plot segments in various colors, using 
+  # polar coordinates and the assigned random color
+  ggplot(dat, aes(
+    x = x0,
+    y = y0,
+    xend = x1,
+    yend = y1,
+    colour = as.factor(colors),  # Convert colors to a factor for discrete scale
+    size = size
+  )) +
+    geom_segment(show.legend = FALSE) +
+    coord_polar() +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0)) + 
+    scale_colour_manual(values = colors) +  # Use the assigned random colors
+    scale_size(range = c(0, 10)) + 
+    theme_void()
+
+}
+
+polar_art(seed=5,n=100)
+polar_art(seed=100,n=100)
+
+
+```
+
+# Exercise 3
+
+Making different files using the version number for naming is simple and denotes the progressive iterations in your directory. Also different iterations of art pieces could be entirely different and making comparisons with version control in Git would be pointless.
+
+# Exercise Group 3
+
+# Exercise 1
+
+```{r}
+library(ggthemes)
+
+# the original function from the first session
+sample_canva <- function(seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]]
+}
+sample_canva()
+```
+
+```{r}
+#making my own random color generator
+sample_named_colours <- function(n) {
+  all_colours <- colours(distinct = TRUE)  # Get all distinct named colors
+  sampled_colours <- sample(all_colours, n)  # Sample n colors from the list
+}
+
+print(sample_named_colours(n=5))
+
+```
+
+```{r}
+custom_polar_art <- function(seed, n) {
+  # Set the seed for random number generation
+  set.seed(seed)
+  
+  # Generate random colors
+  colors <- sample_named_colours(n)
+  
+  #convert colors to factor names
+  colors<- as.factor(colors)
+  
+  #convert shade to factors
+  shade<- as.factor(1:n)
+  
+  # Data frame containing random values for aesthetics
+  dat <- tibble(
+    x0 = runif(n),
+    y0 = runif(n),
+    x1 = x0 + runif(n, min = -.2, max = .2),
+    y1 = y0 + runif(n, min = -.2, max = .2),
+    shade = shade, 
+    size = runif(n)
+  )
+  
+  # Plot segments using polar coordinates and random colors
+  dat |> 
+    ggplot(aes(
+      x = x0,
+      y = y0,
+      xend = x1,
+      yend = y1,
+      colour = shade,
+      size = size
+    )) +
+    geom_segment(show.legend = FALSE) +
+    coord_polar() +
+    scale_y_continuous(expand = c(0, 0)) +
+    scale_x_continuous(expand = c(0, 0)) + 
+    scale_colour_manual(values = colors) +  # Use random colors
+    scale_size(range = c(0, 10)) + 
+    theme_void()
+}
+ 
+custom_polar_art(seed=150, n=100)
+
+```
+
+# Exercise 3
+
+```{r}
+#making the sample canva function choose from all 600 colurs
+custom_sample_canva <- function(seed = NULL) {
+  if (is.null(seed)) {
+    seed <- sample.int(1000, 1)  # Generate a random seed 
+  }
+  set.seed(seed)
+  canva_palettes <- ggthemes::canva_palettes
+  #selecting a random pallete
+  random_palette <- sample(length(canva_palettes), 1)
+  unlist(canva_palettes[random_palette], use.names = FALSE)[[1]]
+}
+
+
+
+custom_sample_canva()
+#unlist(ggthemes::canva_palettes)
+```
+
+# Exercise Group 4
+
+# Exercise 1
+
+```{r}
+library(ggplot2)
+library(tibble)
+library(dplyr)
+
+sample_canva <- function(seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  sample(ggthemes::canva_palettes, 1)[[1]]
+}
+
+sample_data <- function(seed = NULL, n = 100){
+  if(!is.null(seed)) set.seed(seed)
+  dat <- tibble(
+    x0 = runif(n),
+    y0 = runif(n),
+    x1 = x0 + runif(n, min = -.2, max = .2),
+    y1 = y0 + runif(n, min = -.2, max = .2),
+    shade = runif(n), 
+    size = runif(n),
+    shape = factor(sample(0:22, size = n, replace = TRUE))
+  )
+}
+
+polar_styled_plot <- function(data = NULL, palette) {
+  ggplot(
+    data = data,
+    mapping = aes(
+      x = x0,
+      y = y0,
+      xend = x1,
+      yend = y1,
+      colour = shade,
+      size = size
+    )) + 
+    coord_polar(clip = "off") +
+    scale_y_continuous(
+      expand = c(0, 0),
+      limits = c(0, 1), 
+      oob = scales::oob_keep
+    ) +
+    scale_x_continuous(
+      expand = c(0, 0), 
+      limits = c(0, 1), 
+      oob = scales::oob_keep
+    ) + 
+    scale_colour_gradientn(colours = palette) + 
+    scale_size(range = c(0, 10)) + 
+    theme_void() + 
+    guides(
+      colour = guide_none(),
+      size = guide_none(),
+      fill = guide_none(),
+      shape = guide_none()
+    )
+}
+
+print(sample_data())
+sample_canva()
+polar_styled_plot(colors= c("blue","gold", "white"))
+```
+
+# Task 2- Polygon Tricks
+
+```{r}
+#calling packages
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(tibble)
+library(ggplot2)
+library(ambient)
+library(tictoc)
+library(ggthemes)
+library(gifski)
+```
+
+# Exercise Group 1
+
+# Exercise 1
+
+```{r}
+square <- tibble(
+  x = c(0, 1, 1, 0, 0),
+  y = c(0, 0, 1, 1, 0),
+  seg_len = c(1, 1, 1, 1, 0)
+)
+
+show_polygon <- function(polygon, show_vertices = TRUE, colour = "black", ...) {
+  
+  pic <- ggplot(polygon, aes(x, y)) +
+    geom_polygon(fill = NA, colour = colour, show.legend = FALSE, ...) + 
+    coord_equal() + 
+    theme_void()
+  
+  if(show_vertices == TRUE) {
+    pic <- pic + geom_point(size = 2, colour = colour)
+  }
+  return(pic)
+}
+
+sample_edge <- function(polygon) {
+  sample(nrow(polygon), 1, prob = polygon$seg_len)
+}
+
+edge_length <- function(x1, y1, x2, y2) {
+  sqrt((x1 - x2)^2 + (y1 - y2)^2)
+}
+
+edge_noise <- function(size) {
+  runif(1, min = -size/2, max = size/2)
+}
+
+insert_edge <- function(polygon, noise) {
+  
+  # sample and edge and remember its length
+  ind <- sample_edge(polygon)
+  len <- polygon$seg_len[ind]
+  
+  # one endpoint of the old edge
+  last_x <- polygon$x[ind]
+  last_y <- polygon$y[ind]
+  
+  # the other endpoint of the old edge
+  next_x <- polygon$x[ind + 1]
+  next_y <- polygon$y[ind + 1]
+  
+  # location of the new point to be inserted: noise 
+  # is scaled proportional to the length of the old edge
+  new_x <- (last_x + next_x) / 2 + edge_noise(len * noise)
+  new_y <- (last_y + next_y) / 2 + edge_noise(len * noise)
+  
+  # the new row for insertion into the tibble, 
+  # containing coords and length of the 'new' edge
+  new_row <- tibble(
+    x = new_x,
+    y = new_y,
+    seg_len = edge_length(new_x, new_y, next_x, next_y)
+  )
+  
+  # update the length of the 'old' edge
+  polygon$seg_len[ind] <- edge_length(
+    last_x, last_y, new_x, new_y
+  )
+  
+  # insert a row into the tibble
+  bind_rows(
+    polygon[1:ind, ],
+    new_row,
+    polygon[-(1:ind), ]
+  )
+}
+
+grow_polygon <- function(polygon, iterations, noise, seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  for(i in 1:iterations) polygon <- insert_edge(polygon, noise)
+  return(polygon)
+}
+
+
+
+# modify this code
+pic <- square |> 
+  grow_polygon(iterations = 1000, noise = 1, seed = 5) |> 
+  show_polygon(show_vertices = FALSE)
+
+plot(pic)
+
+grow_polygon(polygon=square, iterations = 1000, noise = 1, seed= NULL)
+```
+
+# Exercise 2
+
+```{r}
+square <- tibble(
+  x = c(0, 1, 1, 0, 0),
+  y = c(0, 0, 1, 1, 0),
+  seg_len = c(1, 1, 1, 1, 0)
+)
+
+show_polygon <- function(polygon, show_vertices = TRUE, colour = "black", ...) {
+  
+  pic <- ggplot(polygon, aes(x, y)) +
+    geom_polygon(fill = NA, colour = colour, show.legend = FALSE, ...) + 
+    coord_equal() + 
+    theme_void()
+  
+  if(show_vertices == TRUE) {
+    pic <- pic + geom_point(size = 2, colour = colour)
+  }
+  return(pic)
+}
+
+sample_edge <- function(polygon) {
+  sample(nrow(polygon), 1, prob = polygon$seg_len)
+}
+
+edge_length <- function(x1, y1, x2, y2) {
+  sqrt((x1 - x2)^2 + (y1 - y2)^2)
+}
+
+edge_noise <- function(size) {
+  runif(1, min = -size/2, max = size/2)
+}
+
+insert_edge <- function(polygon, noise) {
+  
+  # sample and edge and remember its length
+  ind <- sample_edge(polygon)
+  len <- polygon$seg_len[ind]
+  
+  # one endpoint of the old edge
+  last_x <- polygon$x[ind]
+  last_y <- polygon$y[ind]
+  
+  # the other endpoint of the old edge
+  next_x <- polygon$x[ind + 1]
+  next_y <- polygon$y[ind + 1]
+  
+  # location of the new point to be inserted: noise 
+  # is scaled proportional to the length of the old edge
+  new_x <- (last_x + next_x) / 2 + edge_noise(len * noise)
+  new_y <- (last_y + next_y) / 2 + edge_noise(len * noise)
+  
+  # the new row for insertion into the tibble, 
+  # containing coords and length of the 'new' edge
+  new_row <- tibble(
+    x = new_x,
+    y = new_y,
+    seg_len = edge_length(new_x, new_y, next_x, next_y)
+  )
+  
+  # update the length of the 'old' edge
+  polygon$seg_len[ind] <- edge_length(
+    last_x, last_y, new_x, new_y
+  )
+  
+  # insert a row into the tibble
+  bind_rows(
+    polygon[1:ind, ],
+    new_row,
+    polygon[-(1:ind), ]
+  )
+}
+
+grow_polygon <- function(polygon, iterations, noise, seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  for(i in 1:iterations) polygon <- insert_edge(polygon, noise)
+  return(polygon)
+}
+
+grow_multipolygon <- function(base_shape, n, seed = NULL, ...) {
+  if(!is.null(seed)) set.seed(seed)
+  polygons <- list()
+  for(i in 1:n) {
+    polygons[[i]] <- grow_polygon(base_shape, ...)
+  }
+  polygons <- bind_rows(polygons, .id = "id")
+  polygons
+}
+
+show_multipolygon <- function(polygon, fill, alpha = .02, ...) {
+  ggplot(polygon, aes(x, y, group = id)) +
+    geom_polygon(colour = NA, alpha = alpha, fill = fill, ...) + 
+    coord_equal() + 
+    theme_void()
+}
+
+# simplified version of the one in the workshop
+tic()
+dat <- square |> 
+  grow_polygon(iterations = 100, noise = .5, seed = 2) |>
+  grow_multipolygon(n = 20, iterations = 500, noise = 0.1, seed =100)
+pic <- show_multipolygon(dat, fill = "blue", alpha = .2)
+plot(pic)
+toc()
+```
+
+# Exercise Group 2
+
+# Exercise 1
+
+```{r}
+library(dplyr)
+library(purrr)
+library(tidyr)
+library(tibble)
+library(ggplot2)
+library(ambient)
+library(tictoc)
+library(ggthemes)
+library(here)
+library(dplyr)
+
+# ...
+
+dat <- dat %>%
+  mutate(across(.cols = everything(), .fns = unlist))
+edge_length <- function(x1, y1, x2, y2) {
+  sqrt((x1 - x2)^2 + (y1 - y2)^2)
+}
+
+edge_noise <- function(size) {
+  runif(1, min = -size/2, max = size/2)
+}
+
+sample_edge_l <- function(polygon) {
+  sample(length(polygon), 1, prob = map_dbl(polygon, ~ .x$seg_len))
+}
+
+insert_edge_l <- function(polygon, noise) {
+  
+  ind <- sample_edge_l(polygon)
+  len <- polygon[[ind]]$seg_len
+  
+  last_x <- polygon[[ind]]$x
+  last_y <- polygon[[ind]]$y
+  
+  next_x <- polygon[[ind + 1]]$x
+  next_y <- polygon[[ind + 1]]$y
+  
+  new_x <- (last_x + next_x) / 2 + edge_noise(len * noise)
+  new_y <- (last_y + next_y) / 2 + edge_noise(len * noise)
+  
+  new_point <- list(
+    x = new_x,
+    y = new_y,
+    seg_len = edge_length(new_x, new_y, next_x, next_y)
+  )
+  
+  polygon[[ind]]$seg_len <- edge_length(
+    last_x, last_y, new_x, new_y
+  )
+  
+  c(
+    polygon[1:ind],
+    list(new_point),
+    polygon[-(1:ind)]
+  )
+}
+
+grow_polygon_l <- function(polygon, iterations, noise, seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  for(i in 1:iterations) polygon <- insert_edge_l(polygon, noise)
+  return(polygon)
+}
+
+grow_multipolygon_l <- function(base_shape, n, seed = NULL, ...) {
+  if(!is.null(seed)) set.seed(seed)
+  polygons <- list()
+  for(i in 1:n) {
+    polygons[[i]] <- grow_polygon_l(base_shape, ...) |>
+      transpose() |>
+      as_tibble() |>
+      mutate(across(.fn = unlist))
+  }
+  polygons <- bind_rows(polygons, .id = "id")
+  polygons
+}
+
+show_multipolygon <- function(polygon, fill, alpha = .02, ...) {
+  ggplot(polygon, aes(x, y, group = id)) +
+    geom_polygon(colour = NA, alpha = alpha, fill = fill, ...) + 
+    coord_equal() + 
+    theme_void()
+}
+
+splotch <- function(seed, layers = 1) {
+  set.seed(seed)
+  square_l <- transpose(tibble(
+    x = c(0, 1, 1, 0, 0),
+    y = c(0, 0, 1, 1, 0),
+    seg_len = c(1, 1, 1, 1, 0)
+  ))
+  square_l |> 
+    grow_polygon_l(iterations = 10, noise = .5, seed = seed) |>
+    grow_multipolygon_l(n = layers, iterations = 500, noise = .8, seed = seed) 
+}
+
+tic()
+dat <- splotch(seed = 1)
+pic <- dat |> show_multipolygon(fill = "yellow", alpha = .2)
+ggsave(
+  filename = here("output", "splotch.png"), 
+  plot = pic,
+  width = 2000,
+  height = 2000,
+  units = "px",
+  dpi = 300,
+  bg = "black"
+)
+
+
+pic
+
+```
+
+# Exercise 2
+
+```{r}
+#making a triangle instead of a hexagon
+edge_length <- function(x1, y1, x2, y2) {
+  sqrt((x1 - x2)^2 + (y1 - y2)^2)
+}
+
+edge_noise <- function(size) {
+  runif(1, min = -size/2, max = size/2)
+}
+
+sample_edge_l <- function(polygon) {
+  sample(length(polygon), 1, prob = map_dbl(polygon, ~ .x$seg_len))
+}
+
+insert_edge_l <- function(polygon, noise) {
+  ind <- sample_edge_l(polygon)
+  len <- polygon[[ind]]$seg_len
+  
+  last_x <- polygon[[ind]]$x
+  last_y <- polygon[[ind]]$y
+  
+  next_x <- polygon[[ind + 1]]$x
+  next_y <- polygon[[ind + 1]]$y
+  
+  new_x <- (last_x + next_x) / 2 + edge_noise(len * noise)
+  new_y <- (last_y + next_y) / 2 + edge_noise(len * noise)
+  
+  new_point <- list(
+    x = new_x,
+    y = new_y,
+    seg_len = edge_length(new_x, new_y, next_x, next_y)
+  )
+  
+  polygon[[ind]]$seg_len <- edge_length(last_x, last_y, new_x, new_y)
+  
+  c(
+    polygon[1:ind],
+    list(new_point),
+    polygon[-(1:ind)]
+  )
+}
+
+grow_polygon_l <- function(polygon, iterations, noise, seed = NULL) {
+  if(!is.null(seed)) set.seed(seed)
+  for(i in 1:iterations) polygon <- insert_edge_l(polygon, noise)
+  return(polygon)
+}
+
+grow_multipolygon_l <- function(base_shape, n, seed = NULL, ...) {
+  if(!is.null(seed)) set.seed(seed)
+  polygons <- list()
+  for(i in 1:n) {
+    polygons[[i]] <- grow_polygon_l(base_shape, ...) |>
+      transpose() |>
+      as_tibble() |>
+      mutate(across(.fn = unlist))
+  }
+  polygons <- bind_rows(polygons, .id = "id")
+  polygons
+}
+
+show_multipolygon <- function(polygon, fill, alpha = .02, ...) {
+  ggplot(polygon, aes(x, y, group = id)) +
+    geom_polygon(colour = NA, alpha = alpha, fill = fill, ...) + 
+    coord_equal() + 
+    theme_void()
+}
+
+smudged_triangle <- function(seed, noise1 = 0, noise2 = 2, noise3 = 0.5) {
+  set.seed(seed)
+  
+  # define triangular base shape
+  theta <- c(0, 2 * pi / 3, 4 * pi / 3)
+  triangle <- tibble(
+    x = sin(theta),
+    y = cos(theta),
+    seg_len = edge_length(x, y, lead(x), lead(y))
+  )
+  triangle$seg_len[3] <- 0
+  triangle <- transpose(triangle)
+  base <- triangle |> 
+    grow_polygon_l(
+      iterations = 60, 
+      noise = noise1
+    )
+  
+  # define intermediate-base-shapes in clusters
+  polygons <- list()
+  ijk <- 0
+  for(i in 1:3) {
+    base_i <- base |> 
+      grow_polygon_l(
+        iterations =50, 
+        noise = noise2
+      )
+    
+    for(j in 1:3) {
+      base_j <- base_i |> 
+        grow_polygon_l(
+          iterations = 50, 
+          noise = noise2
+        )
+      
+      # grow 10 polygons per intermediate-base
+      for(k in 1:10) {
+        ijk <- ijk + 1
+        polygons[[ijk]] <- base_j |>
+          grow_polygon_l(
+            iterations = 500, 
+            noise = noise3
+          ) |>
+          transpose() |>
+          as_tibble() |>
+          mutate(across(.fn = unlist))
+      }
+    }
+  }
+  
+  # return as data frame
+  bind_rows(polygons, .id = "id")
+}
+
+
+tic()
+dat <- smudged_triangle(seed = 88)
+pic <- dat |> show_multipolygon(fill = "#d4379005")
+ggsave(
+  filename = here("output", "smudged-triangle.png"), 
+  plot = pic,
+  width = 2000,
+  height = 2000,
+  units = "px",
+  dpi = 300,
+  bg = "#222222"
+)
+
+pic
+
+```
+
+# Exercise 3
+
+The mutate function was used to modify the data frame to add two new columns named id and x. The arrange function separates the rows based on the ids so that there are separate shapes.
+
+# Task 3

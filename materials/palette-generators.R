@@ -12,3 +12,7 @@ sample_canva2 <- function(seed = NULL, n = 4) {
   sample(ggthemes::canva_palettes, 1)[[1]] |>
     (\(x) colorRampPalette(x)(n))()  
 }
+
+sample_canva()
+sample_canva2()
+print 
