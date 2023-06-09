@@ -83,3 +83,4 @@ pic <- ggplot(fern_dat, aes(x, y, colour = factor(transform))) +
   )
 
 plot(pic)
+
